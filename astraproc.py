@@ -144,3 +144,11 @@ def getBunchKoef(beam, k, fixed='z'):
     elif fixed == 't':
         phi = k*beam[:,2]
     return np.abs(np.mean(np.exp(1.j*phi)))
+
+def get_v(beam):
+    E0 = getE(beam)
+
+    m = 0.511*10**6
+    gamma = E0/m
+    beta = np.sqrt(1. - 1/gamma**2)
+    return 3e8*beta

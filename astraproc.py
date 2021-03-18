@@ -30,6 +30,18 @@ def process(filename, return_data=False, monitor=False, phi=None):
         endParam = getEndParam(beam, monitor)
         return (endParam, beam, data) if return_data else endParam
 
+def _process2(filename, phi=None, status_flags=[3,5]):
+    try:
+        data = np.loadtxt(filename, dtype = 'float64')
+    except OSError:
+        return (None, None)
+    else:
+        cond = np.logical_or.reduce([data[:,9]==flag for flag in status_flags])
+        data = data[cond, :]
+
+        beam = inNewCoordSys(data, phi=None)
+        return (beam, data)
+
 def rotate(_data, phi=None, ro=None):
     data = np.copy(_data)
     data[1::, 2] = data[1::, 2] + data[0, 2]

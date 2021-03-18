@@ -30,7 +30,7 @@ def process(filename, return_data=False, monitor=False, phi=None):
         endParam = getEndParam(beam, monitor)
         return (endParam, beam, data) if return_data else endParam
 
-def _process2(filename, phi=None, status_flags=[3,5]):
+def _process2(filename, phi=None, status_flags=[3,5], ref_particle=None):
     try:
         data = np.loadtxt(filename, dtype = 'float64')
     except OSError:
@@ -39,26 +39,28 @@ def _process2(filename, phi=None, status_flags=[3,5]):
         cond = np.logical_or.reduce([data[:,9]==flag for flag in status_flags])
         data = data[cond, :]
 
-        beam = inNewCoordSys(data, phi=None)
+        beam = inNewCoordSys(data, phi, ref_particle)
         return (beam, data)
 
-def rotate(_data, phi=None, ro=None):
+def rotate(_data, phi=None, ro=None, ref_particle=None):
     data = np.copy(_data)
     data[1::, 2] = data[1::, 2] + data[0, 2]
     data[1::, 5] = data[1::, 5] + data[0, 5]
 
     if ro is None:
-        data[:, 0] = data[:, 0] - np.mean(data[:, 0])
-        #data[:, 1] = data[:, 1] - np.mean(data[:, 1])
-        data[:, 2] = data[:, 2] - np.mean(data[:, 2])
+        if ref_particle is None:
+            data[:, [0,2]] -= np.mean(data[:, [0,2]], axis=0)
+        else:
+            data[:, [0,2]] -= data[ref_particle, [0,2]]
     else:
-        data[:, 0] = data[:, 0] - ro[0]
-        data[:, 2] = data[:, 2] - ro[1]
+        data[:, [0,2]] -= ro
 
     if phi is None:
-        Px0 = np.mean(data[:, 3])
-        Pz0 = np.mean(data[:, 5])
-        phi = np.arctan(Px0/Pz0)
+        if ref_particle is None:
+            Px0, Pz0 = np.mean(data[:, [3,5]], axis=0)
+            phi = np.arctan(Px0/Pz0)
+        else:
+            phi = np.arctan(data[ref_particle,3]/data[ref_particle,5])
 
     X  = data[:, 0] * np.cos(phi) - data[:, 2] * np.sin(phi)
     Z  = data[:, 0] * np.sin(phi) + data[:, 2] * np.cos(phi)
@@ -67,23 +69,21 @@ def rotate(_data, phi=None, ro=None):
     Y  = data[:, 1]
     Py = data[:, 4]
 
-    Z[1::] = Z[1::] - Z[0]
-    Pz[1::] = Pz[1::] - Pz[0]
+    Z[1:] -= Z[0]
+    Pz[1:] -= Pz[0]
 
     data[:,0:6] = np.column_stack((X, Y, Z, Px, Py, Pz))
     return data
 
 
-def inNewCoordSys(_data, phi=None):
+def inNewCoordSys(_data, phi=None, ref_particle=None):
     """
     Return : numpy array
         Data in the following table: [X, Y, Z, Px, Py, Pz, X', Y', T]
     """
-    data = rotate(_data, phi=phi)
+    data = rotate(_data, phi, ref_particle)
     
-    data[1::, 2] = data[1::, 2] + data[0, 2]
-    data[1::, 5] = data[1::, 5] + data[0, 5]
-    data[1:,6] += data[0,6]
+    data[1:,[2,5,6]] += data[0,[2,5,6]]
 
     AngleX = data[:,3] / data[:,5]
     AngleY = data[:,4] / data[:,5]

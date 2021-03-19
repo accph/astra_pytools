@@ -44,16 +44,15 @@ def _process2(filename, phi=None, status_flags=[3,5], ref_particle=None):
 
 def rotate(_data, phi=None, ro=None, ref_particle=None):
     data = np.copy(_data)
-    data[1::, 2] = data[1::, 2] + data[0, 2]
-    data[1::, 5] = data[1::, 5] + data[0, 5]
+    data[1:,[2,5]] += data[0,[2,5]]
 
-    if ro is None:
-        if ref_particle is None:
-            data[:, [0,2]] -= np.mean(data[:, [0,2]], axis=0)
-        else:
-            data[:, [0,2]] -= data[ref_particle, [0,2]]
-    else:
+
+    if ro is not None:
         data[:, [0,2]] -= ro
+    elif ref_particle is not None:
+        data[:, [0,2]] -= data[ref_particle, [0,2]]
+    else:
+        data[:, [0,2]] -= np.mean(data[:, [0,2]], axis=0)
 
     if phi is None:
         if ref_particle is None:

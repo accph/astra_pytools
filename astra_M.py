@@ -1,7 +1,7 @@
 import numpy as np
 from glob import glob
 from astratools import make_file, run_ASTRA, remove_files
-from astraproc import _process2, get_d, getP, get_v, rotate
+from astraproc import _process2, get_d, getP, rotate
 
 def get_M(lattice, bunch, r0=(0,0), phi0=0, rel_devs=[1e-3]*6):
     M = np.zeros((6,6))
@@ -9,8 +9,6 @@ def get_M(lattice, bunch, r0=(0,0), phi0=0, rel_devs=[1e-3]*6):
     temp_name = f'{lattice}_astra_M'
     temp_bunch_name = f'{temp_name}_bunch.ini'
     for k in range(6):
-        print(f'k = {k}')
-
         remove_files(temp_name)
         remove_files(temp_bunch_name)
 
@@ -23,21 +21,17 @@ def get_M(lattice, bunch, r0=(0,0), phi0=0, rel_devs=[1e-3]*6):
         run_ASTRA(temp_name)
 
         files = glob(f'{temp_name}.[0-9]*.001')
-
         if len(files) == 0:
             return None
 
         beam, _ = _process2(files[0], status_flags=[3], ref_particle=0)
 
-        #import pdb; pdb.set_trace()
         M[0,k] = np.polyfit(x0_var, beam[:,0], 1)[0]
         M[1,k] = np.polyfit(x0_var, beam[:,6], 1)[0]
         M[2,k] = np.polyfit(x0_var, beam[:,1], 1)[0]
         M[3,k] = np.polyfit(x0_var, beam[:,7], 1)[0]
         M[4,k] = np.polyfit(x0_var, -1.*beam[:,2], 1)[0]
         M[5,k] = np.polyfit(x0_var, get_d(beam), 1)[0]
-
-        #import pdb; pdb.set_trace()
 
         remove_files(temp_name)
         remove_files(temp_bunch_name)
@@ -51,11 +45,8 @@ def _generate_beam(temp_bunch_name, bunch, r0, phi0, k, rel_dev):
     s0 = np.std(data[1:,:3], axis=0)
     p0 = np.mean(getP(beam))
 
-    new_data = np.ones((N, 10))
-    new_data[:,[0,1,2,3,4,6]] *= 0
-    new_data[:,5] *= p0
-    new_data[:,7] *= 1.6e-10
-    new_data[:,9] *= 3
+    new_data = np.zeros((N, 10))
+    new_data[:,[5,7,8,9]] = [p0, 1.6e-10, 1, 3]
 
     var = rel_dev*np.linspace(0., 1., N)
     res = None
@@ -65,20 +56,17 @@ def _generate_beam(temp_bunch_name, bunch, r0, phi0, k, rel_dev):
         res = new_data[:,1] = s0[1]*var
     elif k == 1:
         res = var
-        new_data[:,3] = p0 * np.sin(var)
-        new_data[:,5] = p0 * np.cos(var)
+        new_data[:,[3,5]] = p0*np.column_stack((np.sin(var), np.cos(var)))
     elif k == 3:
         res = var
-        new_data[:,4] = p0 * np.sin(var)
-        new_data[:,5] = p0 * np.cos(var)
+        new_data[:,[4,5]] = p0*np.column_stack((np.sin(var), np.cos(var)))
     elif k == 4:
-        new_data[:,2] = s0[2]*var
         res = -1.*s0[2]*var
+        new_data[:,2] = s0[2]*var
     elif k == 5:
         res = var
         new_data[:,5] += p0*var
 
-    #import pdb; pdb.set_trace()
     new_data[1:,[2,5,6]] -= new_data[0,[2,5,6]]
     new_data = rotate(new_data, phi=phi0, ref_particle=0)
     new_data[:,0] += r0[0]
@@ -91,9 +79,3 @@ def _generate_beam(temp_bunch_name, bunch, r0, phi0, k, rel_dev):
 
     np.savetxt(temp_bunch_name, new_data, fmt='% .6e '*8 + '% i '*2)
     return res
-
-
-if __name__ == '__main__':
-    #import pdb; pdb.set_trace()
-    M = get_M('grid', 'beam.ini', r0=(0, 6.1))
-    np.savetxt('res.dat', M, fmt='% .3f')

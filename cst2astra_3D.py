@@ -11,7 +11,7 @@ def format_function(row):
             fmt = '%.6f' % x
             fmt_res = '%.6f' % x
             for char in fmt[::-1]:
-                if char is '0':
+                if char == '0':
                     fmt_res = fmt_res[:-1]
                 else:
                     if char == '.':
@@ -24,14 +24,28 @@ def format_function(row):
         format_row.append(fmt_res)
     return format_row
 
+def writeField(filename, x, y, z, F):
+    header = str(len(x)) + ' ' + ' '.join(f'{e:.3f}' for e in x) + ' \n' \
+           + str(len(y)) + ' ' + ' '.join(f'{e:.3f}' for e in y) + ' \n' \
+           + str(len(z)) + ' ' + ' '.join(f'{e:.5f}' for e in z)
+
+    np.savetxt(filename, F.reshape((len(z)*len(y),len(x))), fmt='%.5e', \
+                header=header, comments='')
+    
 def get_data(filename, skiprows=0):
     data = np.loadtxt(filename, skiprows=skiprows)
-    Z, Y, X = data[:,0], data[:,1], data[:,2]
-    Fx, Fy, Fz = data[:,3], data[:,3], data[:,3]
 
+    for n in range(3):
+        data = data[np.argsort(data[:,n], kind='stable'),:]
+
+    X, Y, Z = data[:,0], data[:,1], data[:,2]
+    Fx, Fy, Fz = data[:,3], data[:,4], data[:,5]
+    
     nx = len(X[(Y==Y[0]) * (Z==Z[0])])
     ny = len(Y[(Z==Z[0]) * (X==X[0])])
     nz = len(Z[(X==X[0]) * (Y==Y[0])])
+    
+    print(f'nx={nx}, ny={ny}, nz={nz}')
 
     X = np.reshape(X, (nz, ny, nx))
     Y = np.reshape(Y, (nz, ny, nx))
@@ -39,50 +53,50 @@ def get_data(filename, skiprows=0):
     Fx = np.reshape(Fx, (nz, ny, nx))
     Fy = np.reshape(Fy, (nz, ny, nx))
     Fz = np.reshape(Fz, (nz, ny, nx))
-    
-    return X, Y, Z, Fx, Fy, Fz
+
+    return 1.e-3*X, 1.e-3*Y, 1.e-3*Z, Fx, Fy, Fz
 
 
 if __name__ == '__main__':
-    X, Y, Z, Fx, Fy, Fz = get_data('dipole_300AT_XZ.dat', skiprows=2)
+    X, Y, Z, Fx, Fy, Fz = get_data('B-Field [Ms]__all.txt', skiprows=2)
     Fx, Fy, Fz = -Fx, -Fy, -Fz
     
-    x, y, z = X[0,0,:], Y[0,:,0], Z[:,0,0]
+    #import pdb; pdb.set_trace()
 
-    print(f'By_max : {np.max(Fy)}');
+    z, y, x = Z[:,0,0], Y[0,:,0], X[0,0,:]
+    ny = len(y)//2
+    print(f'y = {Y[0,ny,0]}')
 
-    #symmetry relative to Z=0 and X=0 planes
-    '''
-    print(f'x0 = {x[len(x)//2]} and z0 = {z[len(z)//2]}')
-    for F in [Fx, Fy, Fx]:
-        for k in range(len(x)//2):
-            F[:,:,k] = F[:,:,-k-1]
-            
-        for k in range(len(z)//2):
-            F[k,:,:] = F[-k-1,:,:]
-    '''     
-    #plt.pcolor(Z[:,:,len(x)//2], Y[:,:,len(x)//2], Fy[:,:,len(x)//2])
     plt.figure()
-    plt.pcolor(X[:,len(y)//2,:], Z[:,len(y)//2,:], Fy[:,len(y)//2,:])
+    plt.pcolor(Z[:,ny,:], X[:,ny,:], Fy[:,ny,:])
     plt.colorbar()
 
-    plt.figure()
-    for k, _ in enumerate(z):
-        plt.plot(X[k,len(y)//2,:], Fy[k,len(y)//2,:])
-    plt.show()
-    '''
-    Fx = np.reshape(Fx, (len(y)*len(z), len(x)))
-    Fy = np.reshape(Fy, (len(y)*len(z), len(x)))
-    Fz = np.reshape(Fz, (len(y)*len(z), len(x)))
+    ny0 = len(y)//2
+    nz0 = len(z)//2
+    nx0 = len(x)//2
+    print(f'y = {y[ny0]}, z = {z[nz0]}, x = {x[nx0]}')
+    print(f'max of By on axis: {np.max(Fy[:, ny0, nx0])} T')
 
+
+    plt.figure()
+    for k, _ in enumerate(x):
+        plt.plot(Z[:,ny,k], Fy[:,ny,k])
+    plt.show()
+
+    writeField('3D_quad4RFgun_ky.bx', x, y, z, Fx)
+    writeField('3D_quad4RFgun_ky.by', x, y, z, Fy)
+    writeField('3D_quad4RFgun_ky.bz', x, y, z, Fz)
+    
+    '''
     for F, axis_name in zip([Fx, Fy, Fz],['bx', 'by', 'bz']):
+        F = np.reshape(F, (len(y)*len(z), len(x)))
+
         with open(f'3D_dipole4RFgun.{axis_name}', 'w') as file:
             file.write(str(len(x)) + ' ' + ' '.join(format_function(x)) + ' \n')
             file.write(str(len(y)) + ' ' + ' '.join(format_function(y)) + ' \n')
             file.write(str(len(z)) + ' ' + ' '.join(format_function(z)) + ' \n')
 
-            for u in range(len(F[:,0])):
-                file.write(' '.join(format_function(F[u,:])) + '\n')
-    
-    print('done!')
+            for row in F:
+                file.write(' '.join(format_function(row)) + '\n')
     '''
+    print('done!')

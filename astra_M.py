@@ -17,7 +17,7 @@ def get_M(lattice, p0, r0=(0,0), phi0=0, deviations=[1e-3]*6):
         make_file(lattice, temp_name, { 'Distribution' : temp_bunch_name,
                                         'Zphase' : 1,
                                         'RUN' : 1,
-                                        'LEField' : 'F'})
+                                        'LSPCH' : False})
         run_ASTRA(temp_name)
 
         files = glob(f'{temp_name}.[0-9]*.001')
@@ -26,6 +26,7 @@ def get_M(lattice, p0, r0=(0,0), phi0=0, deviations=[1e-3]*6):
 
         beam, _ = _process2(files[0], status_flags=[3], ref_particle=0)
         
+        #import pdb; pdb.set_trace()
         M[0,k] = np.polyfit(x0_var, beam[:,0], 1)[0]
         M[1,k] = np.polyfit(x0_var, beam[:,6], 1)[0]
         M[2,k] = np.polyfit(x0_var, beam[:,1], 1)[0]

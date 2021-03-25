@@ -8,7 +8,7 @@ def make_file(pattern_name, new_name, params):
         text = file.read()
 
     for key, value in params.items():
-        patt = compile(_brackets(key)+r' *= *-?\'?[\w\. ]*\'?')
+        patt = compile(_brackets(key)+r' *= *-?\'?[-\w\. ]*\'?')
         if isinstance(value, str):
             text = patt.sub(f"{key}='{value}'", text)
         elif isinstance(value, float):

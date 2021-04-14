@@ -1,0 +1,5 @@
+__pycache__
+test_astra_M/*.py
+test_astra_M/*.xmcd
+test_astra_M/win_config.dat
+

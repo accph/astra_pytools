@@ -1,0 +1,32 @@
+&NEWRUN
+  Head='test'
+  RUN=1
+  Distribution = 'grid.spec3'
+  Qbunch=1.0
+  TRACK_ALL=T,
+  check_ref_part=f
+  H_max=0.01, H_min=0.001
+  AUTO_PHASE=F
+  ZSTART=-1.0, ZSTOP=1.0
+  Zoff=-1.0
+  Zemit=100,  Zphase=1
+  RefS=T
+  EmitS=T,      PhaseS=T
+  TrackS=T,     TcheckS=F
+  Phase_Scan=T
+  LOOP=f
+  HIGH_RES=t
+  Z_min=-1.0
+
+  Tr_EmitS=T
+  Local_emit=F
+  NLOOP=1
+ /
+
+ &DIPOLE
+  LDipole=t
+  D_Type(1) = 'horisontal', D_strength(1)=-0.01,
+  D1(1)=(0.2,-0.087),D2(1)=(-0.2,-0.087), D3(1)=(0.2,0.087), D4(1)=(-0.2,0.087), 
+  D_Gap(1,1)=0.00001, D_Gap(2,1)=0.00001 D_xrot(1)=0.1
+  LOOP=f
+ / 

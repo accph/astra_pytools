@@ -1,0 +1,38 @@
+&NEWRUN
+  Head='sol'
+  RUN=1
+  Distribution = 'grid.spec2'
+  Xoff=0.0,	Yoff=0.0
+  TRACK_ALL=T,
+  H_max=0.01,	H_min=0.001
+  AUTO_PHASE=F
+  ZSTART=0.0, 	ZSTOP=1
+
+  Zemit=100,	Zphase=25
+  RefS=T
+  EmitS=T,     	PhaseS=T
+  TrackS=T,    	TcheckS=F
+  Check_ref_part=f
+  LOOP=f
+  HIGH_RES=t
+  Z_min=-1.0
+
+  NLOOP=1
+  /
+
+ 
+ &CHARGE
+ LSPCH=t, LSPCH3D=t
+  Nzf = 64, Nz0 = 3, Smooth_z = 1
+  Nxf = 64, Nx0 = 3, Smooth_x = 1
+  Nyf = 64, Ny0 = 3, Smooth_y = 1
+! melange=2
+  MAX_COUNT=1
+ /
+
+
+ &SOLENOID
+  LBfield=T,
+  File_Bfield(1)='sol_field.dat',	MaxB(1)=0.015, S_pos(1)=0.5,	S_HIGHER_ORDER(1)=F
+ /
+

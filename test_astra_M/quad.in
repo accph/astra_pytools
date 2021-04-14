@@ -1,0 +1,30 @@
+&NEWRUN
+  Head='test'
+  RUN=3
+  Distribution = '45grid.spec2'
+  Qbunch=1.0
+  TRACK_ALL=T,
+  check_ref_part=f
+  H_max=0.01, H_min=0.001
+  AUTO_PHASE=F
+  ZSTART=0.0, ZSTOP=2.0
+  Zemit=100,  Zphase=1
+  RefS=T
+  EmitS=T,      PhaseS=T
+  TrackS=T,     TcheckS=F
+  Phase_Scan=T
+  LOOP=f
+  HIGH_RES=t
+  Z_min=-1.0
+
+  Tr_EmitS=T
+  Local_emit=F
+  NLOOP=1
+ /
+
+
+&QUADRUPOLE
+  LQUAD=t
+  Q_length(1)=0.3, Q_grad(1)=0.01, Q_bore(1)=0.00001, Q_pos(1)=1.0
+  LOOP=f
+ /

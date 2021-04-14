@@ -7,14 +7,9 @@
 2. `astraproc` process output files of the simulation: return a beam in more suitable coordinates and/or the beam parameters (rms sizes, normalized emittances, Twiss parameters and dispersion function);
 3. `cst2astra_3D` converts `CST studio suite` 3D field export files in `ASTRA` 3D  field  maps CAVITY format (see [**ASTRA**](https://www.desy.de/~mpyflo/) documetation);
 4. `astra_M` calculate a transport matrix 6x6 of the beamline configured with `ASTRA` input file by tracking special defined beams in ASTRA. The coordinate vector is:
-```math
-	\[
-	\begin{pmatrix}
-		x & x' & y & y' & vt & \frac{\Delta p}{p}
-	\end{pmatrix}
-	^\mathsf{T}
-	\]
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/accph/astra_pytools/main/images/vect.gif" alt=""/>
+</p>
 
 ### Requirements
 - Python3

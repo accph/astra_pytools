@@ -39,6 +39,9 @@ def _process2(filename, phi=None, status_flags=[3,5], ref_particle=None):
         cond = np.logical_or.reduce([data[:,9]==flag for flag in status_flags])
         data = data[cond, :]
 
+        if len(data) == 0:
+            return (None, None)
+
         beam = inNewCoordSys(data, phi, ref_particle)
         return (beam, data)
 

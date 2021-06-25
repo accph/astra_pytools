@@ -36,14 +36,14 @@ from astraproc import _process2, getEndParam
 patt_name = 'drift' # name of pattern file
 new_name = f'{patt_name}_0' # name of new file
 
-remove_files(new_name) # remove files with new name, if existing
+remove_files(new_name) # remove files with new name if existing
 
 params = { 'Q_grad(1)' : 1.5,
            'Q_grad(2)' : 1.6 } # parameters to change
 
 
 '''
-    make fike and run ASTRA
+    make file and run ASTRA
 '''
 make_file(patt_name, new_name, params) # make new input file
 run_ASTRA(new_name) # run ASTRA calculations

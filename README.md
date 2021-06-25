@@ -20,12 +20,10 @@
 
 It was tested for Windows.
 
-### Simple example of usage
+### Example of usage
 Modules should be run in working directory (with `ASTRA` input/output files). 
 
-
-### Example of usage
-Simple example of running ASTRA calculations with quadrupoles currents changed.
+Simple example of running ASTRA calculations with quadrupoles currents changed:
 ```python
 from astratools import make_file, run_ASTRA, remove_files
 from astraproc import _process2, getEndParam

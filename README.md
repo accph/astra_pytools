@@ -23,4 +23,37 @@ It was tested for Windows.
 ### Simple example of usage
 Modules should be run in working directory (with `ASTRA` input/output files). 
 
-**!!!DO examples!!!**
+
+### Example of usage
+Simple example of running ASTRA calculations with quadrupoles currents changed.
+```python
+from astratools import make_file, run_ASTRA, remove_files
+from astraproc import _process2, getEndParam
+
+'''
+    prepare input file with new parameters
+'''
+patt_name = 'drift' # name of pattern file
+new_name = f'{patt_name}_0' # name of new file
+
+remove_files(new_name) # remove files with new name, if existing
+
+params = { 'Q_grad(1)' : 1.5,
+           'Q_grad(2)' : 1.6 } # parameters to change
+
+
+'''
+    make fike and run ASTRA
+'''
+make_file(patt_name, new_name, params) # make new input file
+run_ASTRA(new_name) # run ASTRA calculations
+
+
+'''
+    postprocessing
+'''
+data_name = f'{new_name}.0538.001' # output file name
+
+beam, data = _process2(data_name) # postprocessing
+print(getEndParam(beam)) # print beam parameters
+```
